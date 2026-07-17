@@ -84,6 +84,4 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
-          mvn -Pdeployment -B -ntp \
-            -Dgpg.keyname='${{ secrets.GPG_KEY_FPR }}' \
-            clean deploy
+          mvn -Pdeployment -B -ntp clean deploy
