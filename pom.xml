@@ -5,90 +5,33 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.nina2dv</groupId>
     <artifactId>xml-validation</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>XML Validator</name>
-    <description>
-        <![CDATA[
-Validate XML against XSD and Schematron
-
----
-## JAR
-```
-java -jar xml-validation-X.X.X.jar ./src/main/resources/xsd/istar-rl-schema.xsd ./src/main/resources/schematron/istar-rl-schematron.sch ./src/main/resources/xml/figure1a.xml
-```
-
-## Pull Package
-Add this to pom.xml:
-```xml
-<properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-</properties>
-
-<dependencies>
-    <dependency>
-        <groupId>io.github.nina2dv</groupId>
-        <artifactId>xml-validation</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-</dependencies>
-
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.1.0</version>
-            <configuration>
-                <mainClass>org.example.MyValidatorApp</mainClass>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-Add GitHub username and PAT in `settings.xml`:
-```xml
-<username>GITHUB_USERNAME</username>
-<password>GITHUB_PERSONAL_ACCESS_TOKEN</password>
-```
-
-Run below:
-```
-mvn install -s settings.xml
-```
-
-Example java project:
-```java
-package org.example;
-
-import com.example.validation.XsdValidator;
-import com.example.validation.ValidationResult;
-
-public class MyValidatorApp {
-    public static void main(String[] args) {
-        try {
-            ValidationResult result = XsdValidator.validateXMLSchema("path/to/schema.xsd", "path/to/file.xml");
-            if (result.isValid()) {
-                System.out.println("XML is valid!");
-            } else {
-                System.err.println("XML is not valid: " + result.getErrors());
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-}
-```
-```
-mvn compile exec:java
-```
-    ]]>
-    </description>
+    <description>A Java library and command-line tool for validating XML files against XSD schemas and Schematron rules. It provides a simple interface for performing validations and generating reports, making it easy to ensure the correctness of XML documents in various applications.</description>
     <url>https://github.com/nina2dv/xml-validation</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Nina</name>
+            <url>https://github.com/nina2dv</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/nina2dv/xml-validation.git</connection>
+        <developerConnection>scm:git:git@github.com:nina2dv/xml-validation.git</developerConnection>
+        <url>https://github.com/nina2dv/xml-validation</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -206,16 +149,6 @@ mvn compile exec:java
         </plugins>
     </build>
 
-
-    <!-- Distribution Management for GitHub Packages -->
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/nina2dv/xml-validation</url>
-        </repository>
-    </distributionManagement>
-
     <!-- Maven Profiles for running validations individually -->
     <profiles>
         <!-- Profile for XSD Validation -->
@@ -323,6 +256,76 @@ mvn compile exec:java
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>deployment</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.11.1</version>
+                        <configuration>
+                            <doclint>all,-missing</doclint>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.7</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keyname>${gpg.keyname}</keyname>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>uploaded</waitUntil>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
