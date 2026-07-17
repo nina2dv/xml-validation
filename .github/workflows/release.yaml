@@ -69,6 +69,18 @@ jobs:
       - name: Set pom version from tag
         run: mvn -B -ntp versions:set -DnewVersion="${{ steps.v.outputs.VERSION }}" -DgenerateBackupPoms=false -DprocessAllModules=true
 
+      - name: Resolve imported GPG key fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          FPR="$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')"
+          if [[ -z "$FPR" ]]; then
+            echo "No secret GPG key found after setup-java import." >&2
+            exit 1
+          fi
+          echo "GPG_KEY_FPR=$FPR" >> "$GITHUB_ENV"
+          echo "Using imported GPG key fingerprint ending in ...${FPR: -1}"
+
       - name: Must not be a SNAPSHOT
         shell: bash
         run: |
@@ -84,4 +96,6 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
-          mvn -Pdeployment -B -ntp clean deploy
+          mvn -Pdeployment -B -ntp \
+            -Dgpg.keyname="$GPG_KEY_FPR" \
+            clean deploy
